@@ -1,0 +1,26 @@
+# data / features / outputs
+data/
+features/
+Processed_Features/
+output/
+outputs/
+results/
+models/
+checkpoints/
+*.npy
+*.npz
+*.pt
+*.pth
+*.ckpt
+*.pkl
+*.joblib
+
+# logs / cache
+logs/
+__pycache__/
+.ipynb_checkpoints/
+.DS_Store
+
+# secrets
+.env
+*.key

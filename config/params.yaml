@@ -1,0 +1,63 @@
+# Model hyperparameters, training settings, and grading rules.
+
+training:
+  n_splits: 5
+  seed: 42
+  feat_dim: 1024
+  combine_2048: false
+  l2_norm: true
+  norm_mode: "multiscale"   # "multiscale" or "simple"
+  split_level: "slide"      # "slide" (prevents data leakage) or "tile"
+
+models:
+  LR_SGD:
+    loss: "log_loss"
+    penalty: "l2"
+    alpha: 1.0e-4
+    max_iter: 200
+    tol: 1.0e-3
+    learning_rate: "optimal"
+    early_stopping: true
+    n_iter_no_change: 5
+    class_weight: "balanced"
+
+  XGB:
+    n_estimators: 1000
+    max_depth: 5
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
+    tree_method: "hist"
+    objective: "multi:softprob"
+    n_jobs: 32
+    early_stopping_rounds: 40
+
+  MLP:
+    hidden_layer_sizes: [256, 64]
+    activation: "relu"
+    solver: "adam"
+    alpha: 1.0e-4
+    batch_size: 256
+    learning_rate_init: 1.0e-3
+    max_iter: 200
+    early_stopping: true
+    n_iter_no_change: 10
+
+evaluation:
+  treat_nan_as_class: 5
+  tcga_filter_col: "have_valid_geojson"
+  tcga_filter_val: 0
+
+grading:
+  pattern_map:
+    0: 3
+    1: 4
+    2: 5
+  primary_threshold: 0.95
+  secondary_min: 0.05
+  n_tumor_classes: 3
+  target_names: ["Pattern 3", "Pattern 4", "Pattern 5", "Other"]
+
+batch_training:
+  seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+          15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]

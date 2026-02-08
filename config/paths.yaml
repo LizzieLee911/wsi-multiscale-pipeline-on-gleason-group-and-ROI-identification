@@ -1,0 +1,55 @@
+# Environment-specific data paths.
+# Select environment via CLI (--env) or BASELINE_ENV env var.
+# All paths under each environment are relative to work_root.
+
+nscc:
+  work_root: "/scratch/users/ntu/lizh0106/nscc_work"
+
+  features:
+    aggc_1024:
+      features_npy: "Processed_Features/AGGC/20x_512/features.npy"
+      index_csv: "Processed_Features/AGGC/20x_512/index.csv"
+      tile_npz: "Processed_Features/AGGC/20x_512/AGGC_tile_targets_masks_names.npz"
+    aggc_2048:
+      features_npy: "Processed_Features/AGGC/AGGC_CENTER/AGGC_20x512/features.npy"
+    tcga_1024:
+      features_npy: "Processed_Features/TCGA_PRAD/tcga_without_anno_arrays/20x_512/features.npy"
+      index_csv: "Processed_Features/TCGA_PRAD/tcga_without_anno_arrays/20x_512/index.csv"
+    tcga_2048:
+      features_npy: "Processed_Features/TCGA_PRAD/tcga_without_anno_arrays_c_2048/2048/features.npy"
+
+  raw_features:
+    aggc_20x512: "AGGC_Features/Train_all_features"
+
+  metadata:
+    aggc_meta: "WsiBERT/AGGC_metadata.csv"
+    tcga_truth: "Processed_Features/TCGA_PRAD/final_data_2025NOV.csv"
+
+  output:
+    base_save_dir: "WsiBERT/models_Baseline"
+
+local:
+  work_root: "E:/NSCC重要脚本/data"
+
+  features:
+    aggc_1024:
+      features_npy: "features/AGGC/20x_512/features.npy"
+      index_csv: "features/AGGC/20x_512/index.csv"
+      tile_npz: "features/AGGC/20x_512/AGGC_tile_targets_masks_names.npz"
+    aggc_2048:
+      features_npy: "features/AGGC/AGGC_CENTER/AGGC_20x512/features.npy"
+    tcga_1024:
+      features_npy: "features/TCGA_PRAD/20x_512/features.npy"
+      index_csv: "features/TCGA_PRAD/20x_512/index.csv"
+    tcga_2048:
+      features_npy: "features/TCGA_PRAD/2048/features.npy"
+
+  raw_features:
+    aggc_20x512: "raw_features/AGGC/Train_all_features"
+
+  metadata:
+    aggc_meta: "metadata/AGGC_metadata.csv"
+    tcga_truth: "metadata/final_data_2025NOV.csv"
+
+  output:
+    base_save_dir: "output/models_Baseline"
