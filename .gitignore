@@ -27,4 +27,5 @@ __pycache__/
 *.tiff
 *.tif
 *.jpg
-*.png*.o[0-9]*
+*.png
+*.o[0-9]*
