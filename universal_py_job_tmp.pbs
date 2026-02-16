@@ -1,0 +1,72 @@
+#!/bin/bash
+#PBS -N clau_baseline_lr
+#PBS -q normal
+#PBS -l select=1:ncpus=32:mem=128gb:ngpus=1
+#PBS -l walltime=36:00:00
+#PBS -j oe
+#PBS -P personal-lizh0106
+
+cd $PBS_O_WORKDIR
+
+module load miniforge3
+conda activate trident
+
+PY=/home/users/ntu/lizh0106/scratch/nscc_work/Baseline_models/scripts/train_baseline.py
+
+ENV_NAME="nscc"
+CONFIG_DIR="config"   # 如果你是 config/paths.yaml 就用这个；不需要可删
+
+# grid search
+MODELS=("LR_SGD" "XGB" "MLP")
+L2S=("l2" "nol2")
+COMBINES=("with2048")
+
+# 4) seeds only 1 for now
+SEEDS=(42)
+# SEEDS=($(seq 42 71))   # 30 seeds: 42..71
+
+start_time=$(date +%s)
+echo "Start time: $(date)"
+echo "Using PY=$PY ENV=$ENV_NAME CONFIG_DIR=$CONFIG_DIR"
+echo
+
+for model in "${MODELS[@]}"; do
+  for l2 in "${L2S[@]}"; do
+    for comb in "${COMBINES[@]}"; do
+      for seed in "${SEEDS[@]}"; do
+
+        args=(--model "$model" --env "$ENV_NAME" --seed "$seed" --save)
+
+        # config-dir 只有你代码里真的用到才需要
+        if [ -n "${CONFIG_DIR}" ]; then
+          args+=(--config-dir "$CONFIG_DIR")
+        fi
+
+        if [ "$l2" = "l2" ]; then
+          args+=(--l2)
+        else
+          args+=(--no-l2)
+        fi
+
+        if [ "$comb" = "with2048" ]; then
+          args+=(--combine-2048)
+        else
+          args+=(--no-combine-2048)
+        fi
+
+        echo "=== Running: python $PY ${args[*]} ==="
+        date
+        python "$PY" "${args[@]}"
+        echo "=== Done ==="
+        date
+        echo
+
+      done
+    done
+  done
+done
+
+end_time=$(date +%s)
+runtime=$((end_time - start_time))
+echo "Finish time: $(date)"
+echo "Total runtime: ${runtime} seconds"

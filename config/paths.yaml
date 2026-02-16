@@ -13,10 +13,10 @@ nscc:
     aggc_2048:
       features_npy: "Processed_Features/AGGC/AGGC_CENTER/AGGC_20x512/features.npy"
     tcga_1024:
-      features_npy: "Processed_Features/TCGA_PRAD/tcga_without_anno_arrays/20x_512/features.npy"
-      index_csv: "Processed_Features/TCGA_PRAD/tcga_without_anno_arrays/20x_512/index.csv"
+        features_npy: "Processed_Features/TGGA_PRAD_V2/TGGA_PRAD_V2_without_anno/TCGA_20x512/features.npy"
+        index_csv: "Processed_Features/TGGA_PRAD_V2/TGGA_PRAD_V2_without_anno/TCGA_20x512/index.csv"
     tcga_2048:
-      features_npy: "Processed_Features/TCGA_PRAD/tcga_without_anno_arrays_c_2048/2048/features.npy"
+      features_npy: "Processed_Features/TGGA_PRAD_V2/TGGA_PRAD_V2_without_anno_2048/TCGA_20x2048/features.npy"
 
   raw_features:
     aggc_20x512: "AGGC_Features/Train_all_features"
@@ -26,7 +26,7 @@ nscc:
     tcga_truth: "Processed_Features/TCGA_PRAD/final_data_2025NOV.csv"
 
   output:
-    base_save_dir: "WsiBERT/models_Baseline"
+    base_save_dir: "Baseline_models/results"
 
 local:
   work_root: "E:/NSCC重要脚本/data"
