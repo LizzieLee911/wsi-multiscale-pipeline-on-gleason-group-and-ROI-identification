@@ -45,6 +45,9 @@ def parse_args():
     p.add_argument("--save", action="store_true", dest="save", default=False)
     p.add_argument("--no-save", action="store_false", dest="save")
     p.add_argument("--seed", type=int, default=42)
+    p.add_argument("--agg-input", type=str, default="proba",
+                   choices=["proba", "labels"],
+                   help="Slide aggregation input: use tile probabilities or labels")
     p.add_argument("--config-dir", type=str, default=None)
     return p.parse_args()
 
@@ -110,8 +113,20 @@ def main():
     )
 
     # --- Slide-level aggregation and evaluation ---
-    out_tcga = agg_from_tiles(df_tcga_idx, tcga_pred_labels)
-    out_aggc = agg_from_tiles(df_aggc_idx, cv_result["oof_pred_labels"])
+    out_tcga = agg_from_tiles(
+        df_tcga_idx,
+        tcga_proba_mean if args.agg_input == "proba" else tcga_pred_labels,
+        agg_input=args.agg_input,
+    )
+    out_aggc = agg_from_tiles(
+        df_aggc_idx,
+        (
+            cv_result["oof_proba"]
+            if args.agg_input == "proba"
+            else cv_result["oof_pred_labels"]
+        ),
+        agg_input=args.agg_input,
+    )
 
     print("\n--- TCGA slide-level ---")
     results_tcga = evaluate_slide_predictions(out_tcga, truth_tcga_df)

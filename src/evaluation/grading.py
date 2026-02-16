@@ -34,16 +34,19 @@ def gleason_to_isup(g1, g2):
         return 4       # ISUP 5
 
 
-def agg_from_tiles(df_index, pred_labels, pattern_map=None,
-                   primary_thresh=0.95, secondary_min=0.05):
+def agg_from_tiles(df_index, tile_predictions, pattern_map=None,
+                   primary_thresh=0.95, secondary_min=0.05,
+                   agg_input="proba"):
     """Aggregate tile-level class predictions to slide-level Gleason/ISUP.
 
     Parameters
     ----------
     df_index : pd.DataFrame
         Index DataFrame with columns ``slide_id``, ``start``, ``length``.
-    pred_labels : np.ndarray
-        Tile-level predicted class labels (0=G3, 1=G4, 2=G5, 3=Other).
+    tile_predictions : np.ndarray
+        Tile-level model outputs. Supports either:
+        - class labels with shape ``(n_tiles,)`` (0=G3, 1=G4, 2=G5, 3=Other)
+        - class probabilities with shape ``(n_tiles, n_classes)``.
     pattern_map : dict, optional
         Mapping from class index to Gleason pattern. Defaults to
         ``{0: 3, 1: 4, 2: 5}``.
@@ -51,6 +54,9 @@ def agg_from_tiles(df_index, pred_labels, pattern_map=None,
         If the primary pattern fraction ≥ this, treat as single-pattern.
     secondary_min : float
         If the second pattern fraction < this, treat as single-pattern.
+    agg_input : str
+        Aggregation input type. ``"labels"`` uses tile counts per class;
+        ``"proba"`` sums tile probabilities per class before ranking.
 
     Returns
     -------
@@ -61,17 +67,29 @@ def agg_from_tiles(df_index, pred_labels, pattern_map=None,
     if pattern_map is None:
         pattern_map = PATTERN_MAP
 
+    if agg_input not in {"labels", "proba"}:
+        raise ValueError("agg_input must be either 'labels' or 'proba'.")
+
     out_rows = []
     for _, row in df_index.iterrows():
         slide_id = row["slide_id"]
         start = row["start"]
         end = start + row["length"]
 
-        tiles_preds = pred_labels[start:end]
+        tiles_preds = tile_predictions[start:end]
 
-        counts = np.bincount(tiles_preds, minlength=4)
-        tumor_counts = counts[:3]
-        total_tumor = tumor_counts.sum()
+        if agg_input == "labels":
+            counts = np.bincount(tiles_preds, minlength=4)
+            tumor_scores = counts[:3].astype(float)
+        else:
+            if tiles_preds.ndim != 2 or tiles_preds.shape[1] < 3:
+                raise ValueError(
+                    "For agg_input='proba', tile_predictions must have "
+                    "shape (n_tiles, n_classes>=3)."
+                )
+            tumor_scores = tiles_preds[:, :3].sum(axis=0)
+
+        total_tumor = tumor_scores.sum()
 
         if total_tumor == 0:
             out_rows.append({
@@ -84,7 +102,7 @@ def agg_from_tiles(df_index, pred_labels, pattern_map=None,
             })
             continue
 
-        p3, p4, p5 = tumor_counts / total_tumor
+        p3, p4, p5 = tumor_scores / total_tumor
         fractions = np.array([p3, p4, p5])
 
         order = np.argsort(-fractions)
