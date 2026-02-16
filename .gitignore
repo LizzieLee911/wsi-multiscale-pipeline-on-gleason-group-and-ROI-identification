@@ -24,4 +24,7 @@ __pycache__/
 # secrets
 .env
 *.key
-*.o[0-9]*
+*.tiff
+*.tif
+*.jpg
+*.png*.o[0-9]*
