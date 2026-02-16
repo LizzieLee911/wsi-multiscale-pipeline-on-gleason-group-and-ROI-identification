@@ -26,10 +26,8 @@ from src.evaluation.metrics import evaluate_slide_predictions
 from src.models.train import cross_validate, predict_external
 from src.utils.io import build_save_path, save_experiment_artifacts
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s  %(name)s  %(levelname)s  %(message)s",
-)
+logging.basicConfig(level=logging.INFO,
+                    format="%(asctime)s  %(name)s  %(levelname)s  %(message)s",)
 
 
 def parse_args():

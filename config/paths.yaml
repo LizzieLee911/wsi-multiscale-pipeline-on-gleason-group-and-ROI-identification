@@ -29,7 +29,7 @@ nscc:
     base_save_dir: "WsiBERT/models_Baseline"
 
 local:
-  work_root: "E:/NSCC重要脚本/data"
+  work_root: "D:/BMDSIS/Baseline_models"
 
   features:
     aggc_1024:
