@@ -26,7 +26,7 @@ nscc:
     tcga_truth: "Processed_Features/TCGA_PRAD/final_data_2025NOV.csv"
 
   output:
-    base_save_dir: "Baseline_models/results"
+    base_save_dir: "Baseline_models/results/hard_labels"
 
 local:
   work_root: "D:/BMDSIS/Baseline_models"

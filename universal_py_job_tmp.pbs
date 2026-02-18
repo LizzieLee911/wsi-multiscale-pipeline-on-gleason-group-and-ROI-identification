@@ -2,7 +2,7 @@
 #PBS -N clau_baseline_lr
 #PBS -q normal
 #PBS -l select=1:ncpus=32:mem=128gb:ngpus=1
-#PBS -l walltime=36:00:00
+#PBS -l walltime=12:00:00
 #PBS -j oe
 #PBS -P personal-lizh0106
 
@@ -17,8 +17,11 @@ ENV_NAME="nscc"
 CONFIG_DIR="config"   # 如果你是 config/paths.yaml 就用这个；不需要可删
 
 # grid search
-MODELS=("LR_SGD" "XGB" "MLP")
-L2S=("l2" "nol2")
+# MODELS=("LR_SGD" "XGB" "MLP")
+# L2S=("l2" "nol2")
+# COMBINES=("with2048" "tile_only")
+MODELS=("MLP")
+L2S=("nol2")
 COMBINES=("with2048")
 
 # 4) seeds only 1 for now
@@ -35,7 +38,7 @@ for model in "${MODELS[@]}"; do
     for comb in "${COMBINES[@]}"; do
       for seed in "${SEEDS[@]}"; do
 
-        args=(--model "$model" --env "$ENV_NAME" --seed "$seed" --save)
+        args=(--model "$model" --env "$ENV_NAME" --seed "$seed" --save --agg-input labels)
 
         # config-dir 只有你代码里真的用到才需要
         if [ -n "${CONFIG_DIR}" ]; then
