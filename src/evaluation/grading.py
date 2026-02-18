@@ -57,6 +57,9 @@ def agg_from_tiles(df_index, tile_predictions, pattern_map=None,
     agg_input : str
         Aggregation input type. ``"labels"`` uses tile counts per class;
         ``"proba"`` sums tile probabilities per class before ranking.
+        For backward compatibility, if ``agg_input='proba'`` but an array of
+        hard labels with shape ``(n_tiles,)`` is provided, labels-based
+        aggregation is used automatically.
 
     Returns
     -------
@@ -70,6 +73,8 @@ def agg_from_tiles(df_index, tile_predictions, pattern_map=None,
     if agg_input not in {"labels", "proba"}:
         raise ValueError("agg_input must be either 'labels' or 'proba'.")
 
+    tile_predictions = np.asarray(tile_predictions)
+
     out_rows = []
     for _, row in df_index.iterrows():
         slide_id = row["slide_id"]
@@ -78,7 +83,9 @@ def agg_from_tiles(df_index, tile_predictions, pattern_map=None,
 
         tiles_preds = tile_predictions[start:end]
 
-        if agg_input == "labels":
+        use_labels = agg_input == "labels" or tiles_preds.ndim == 1
+
+        if use_labels:
             counts = np.bincount(tiles_preds, minlength=4)
             tumor_scores = counts[:3].astype(float)
         else:
