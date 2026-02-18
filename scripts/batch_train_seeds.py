@@ -43,13 +43,17 @@ def parse_args():
                    dest="combine_2048")
     p.add_argument("--save", action="store_true", default=True)
     p.add_argument("--no-save", action="store_false", dest="save")
+    p.add_argument("--agg-input", type=str, default="proba",
+                   choices=["proba", "labels"],
+                   help="Slide aggregation input: use tile probabilities or hard labels")
     p.add_argument("--config-dir", type=str, default=None)
     return p.parse_args()
 
 
 def run_experiment(aggc_feats, tcga_feats, labels, df_aggc_idx, df_tcga_idx,
                    truth_tcga_df, truth_aggc_df, model_name, model_params,
-                   seeds, n_splits, split_level, save_dir=None):
+                   seeds, n_splits, split_level, agg_input="proba",
+                   save_dir=None):
     """Run over all *seeds* and return a list of per-seed result dicts."""
     results = []
     for seed in seeds:
@@ -59,6 +63,24 @@ def run_experiment(aggc_feats, tcga_feats, labels, df_aggc_idx, df_tcga_idx,
             df_aggc_idx, df_tcga_idx, truth_tcga_df, truth_aggc_df,
             model_name, model_params, n_splits, split_level,
         )
+
+        out_tcga = agg_from_tiles(
+            df_tcga_idx,
+            r["tcga_proba_mean"] if agg_input == "proba" else r["tcga_pred_labels"],
+            agg_input=agg_input,
+        )
+        out_aggc = agg_from_tiles(
+            df_aggc_idx,
+            r["oof_proba"] if agg_input == "proba" else r["oof_pred_labels"],
+            agg_input=agg_input,
+        )
+        results_tcga = evaluate_slide_predictions(out_tcga, truth_tcga_df, verbose=False)
+        results_aggc = evaluate_slide_predictions(out_aggc, truth_aggc_df, verbose=False)
+        r["results_tcga"] = results_tcga
+        r["results_aggc"] = results_aggc
+        r["tcga_balanced_acc"] = results_tcga["balanced_acc_valid"]
+        r["aggc_balanced_acc"] = results_aggc["balanced_acc_valid"]
+
         results.append(r)
 
         if save_dir:
@@ -134,6 +156,7 @@ def main():
         aggc_default, tcga_default, labels,
         df_aggc_idx, df_tcga_idx, truth_tcga_df, truth_aggc_df,
         model_name, model_params, seeds, n_splits, split_level,
+        args.agg_input,
         save_dir_default,
     )
 
@@ -152,6 +175,7 @@ def main():
         aggc_combine, tcga_combine, labels,
         df_aggc_idx, df_tcga_idx, truth_tcga_df, truth_aggc_df,
         model_name, model_params, seeds, n_splits, split_level,
+        args.agg_input,
         save_dir_combine,
     )
 
