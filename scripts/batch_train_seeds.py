@@ -43,7 +43,7 @@ def parse_args():
                    dest="combine_2048")
     p.add_argument("--save", action="store_true", default=True)
     p.add_argument("--no-save", action="store_false", dest="save")
-    p.add_argument("--agg-input", type=str, default="proba",
+    p.add_argument("--agg-input", type=str, default="labels",
                    choices=["proba", "labels"],
                    help="Slide aggregation input: use tile probabilities or hard labels")
     p.add_argument("--config-dir", type=str, default=None)

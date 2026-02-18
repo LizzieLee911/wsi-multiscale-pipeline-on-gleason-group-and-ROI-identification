@@ -2,7 +2,7 @@
 #PBS -N clau_batch_seeds
 #PBS -q normal
 #PBS -l select=1:ncpus=32:mem=128gb:ngpus=1
-#PBS -l walltime=12:00:00
+#PBS -l walltime=18:00:00
 #PBS -j oe
 #PBS -P personal-lizh0106
 
@@ -17,7 +17,7 @@ ENV_NAME="nscc"
 CONFIG_DIR="config"   # 如果你是 config/paths.yaml 就用这个；不需要可删
 
 # 可选模型：LR_SGD / XGB / MLP
-MODELS=("LR_SGD")
+MODELS=("XGB")
 
 # slide aggregation 输入: proba / labels
 AGG_INPUT="labels"
