@@ -53,7 +53,7 @@ def parse_args():
 
 def run_experiment(aggc_feats, tcga_feats, labels, df_aggc_idx, df_tcga_idx,
                    truth_tcga_df, truth_aggc_df, model_name, model_params,
-                   seeds, n_splits, split_level, agg_input="proba",
+                   seeds, n_splits, split_level, agg_input="labels",
                    save_dir=None):
     """Run over all *seeds* and return a list of per-seed result dicts."""
     results = []

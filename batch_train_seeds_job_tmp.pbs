@@ -23,10 +23,10 @@ MODELS=("XGB")
 AGG_INPUT="labels"
 
 # l2 / nol2
-L2_MODE="l2"
+L2_MODE="no-l2"
 
 # with2048 / tileonly
-COMBINE_MODE="with2048"
+COMBINE_MODE="tileonly"
 
 start_time=$(date +%s)
 echo "Start time: $(date)"
