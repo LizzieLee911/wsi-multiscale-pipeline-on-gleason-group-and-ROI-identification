@@ -1,4 +1,4 @@
-"""Multi-seed experiment runner for statistical comparison.
+"""Multi-seed experiment runner.
 
 Usage
 -----
@@ -17,7 +17,6 @@ sys.path.insert(0, str(PROJECT_ROOT))
 import joblib
 import numpy as np
 import pandas as pd
-from scipy import stats
 
 from src.config import get_env, load_params, load_paths
 from src.data.features import prepare_features
@@ -37,6 +36,8 @@ def parse_args():
     p.add_argument("--env", type=str, default=None)
     p.add_argument("--model", type=str, default="LR_SGD",
                    choices=["LR_SGD", "XGB", "MLP"])
+    p.add_argument("--l2", action="store_true", dest="l2", default=True)
+    p.add_argument("--no-l2", action="store_false", dest="l2")
     p.add_argument("--combine-2048", action="store_true", dest="combine_2048",
                    default=False)
     p.add_argument("--no-combine-2048", action="store_false",
@@ -141,61 +142,42 @@ def main():
         truth_tcga_df = truth_tcga_df[truth_tcga_df[filter_col] == filter_val]
     truth_aggc_df = pd.read_csv(paths["metadata"]["aggc_meta"])
 
-    # --- Run default features ---
-    aggc_default, tcga_default = prepare_features(
-        paths["features"], combine_2048=False, l2_norm=True,
+    # --- Prepare features based on args ---
+    aggc_feats, tcga_feats = prepare_features(
+        paths["features"],
+        combine_2048=args.combine_2048,
+        l2_norm=args.l2,
         norm_mode=norm_mode,
     )
-    save_dir_default = None
+
+    l2_tag = "l2" if args.l2 else "nol2"
+    combine_tag = "with2048" if args.combine_2048 else "tileonly"
+
+    save_dir = None
     if args.save:
-        save_dir_default = (
+        save_dir = (
             paths["output"]["base_save_dir"]
-            / f"{model_name}_l2_tileonly_seeds" / "default"
+            / f"{model_name}_{l2_tag}_{combine_tag}_seeds"
+            / combine_tag
         )
-    results_default = run_experiment(
-        aggc_default, tcga_default, labels,
+
+    results = run_experiment(
+        aggc_feats, tcga_feats, labels,
         df_aggc_idx, df_tcga_idx, truth_tcga_df, truth_aggc_df,
         model_name, model_params, seeds, n_splits, split_level,
         args.agg_input,
-        save_dir_default,
+        save_dir,
     )
 
-    # --- Run combined 2048 features ---
-    aggc_combine, tcga_combine = prepare_features(
-        paths["features"], combine_2048=True, l2_norm=True,
-        norm_mode=norm_mode,
-    )
-    save_dir_combine = None
-    if args.save:
-        save_dir_combine = (
-            paths["output"]["base_save_dir"]
-            / f"{model_name}_l2_with2048_seeds" / "combine_2048"
-        )
-    results_combine = run_experiment(
-        aggc_combine, tcga_combine, labels,
-        df_aggc_idx, df_tcga_idx, truth_tcga_df, truth_aggc_df,
-        model_name, model_params, seeds, n_splits, split_level,
-        args.agg_input,
-        save_dir_combine,
-    )
-
-    # --- Statistical comparison ---
-    tcga_default_acc = [r["tcga_balanced_acc"] for r in results_default]
-    tcga_combine_acc = [r["tcga_balanced_acc"] for r in results_combine]
-    aggc_default_acc = [r["aggc_balanced_acc"] for r in results_default]
-    aggc_combine_acc = [r["aggc_balanced_acc"] for r in results_combine]
-
-    tcga_t = stats.ttest_ind(tcga_combine_acc, tcga_default_acc, equal_var=False)
-    aggc_t = stats.ttest_ind(aggc_combine_acc, aggc_default_acc, equal_var=False)
+    tcga_acc = [r["tcga_balanced_acc"] for r in results]
+    aggc_acc = [r["aggc_balanced_acc"] for r in results]
 
     print("\n" + "=" * 60)
-    print("TCGA balanced acc (default):", np.mean(tcga_default_acc))
-    print("TCGA balanced acc (combine):", np.mean(tcga_combine_acc))
-    print("TCGA t-test:", tcga_t)
-    print()
-    print("AGGC balanced acc (default):", np.mean(aggc_default_acc))
-    print("AGGC balanced acc (combine):", np.mean(aggc_combine_acc))
-    print("AGGC t-test:", aggc_t)
+    print(f"Mode: {combine_tag} | L2: {args.l2} | agg-input: {args.agg_input}")
+    print("TCGA balanced acc mean:", np.mean(tcga_acc))
+    print("TCGA balanced acc std:", np.std(tcga_acc))
+    print("AGGC balanced acc mean:", np.mean(aggc_acc))
+    print("AGGC balanced acc std:", np.std(aggc_acc))
 
 
 if __name__ == "__main__":

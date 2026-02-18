@@ -22,9 +22,15 @@ MODELS=("LR_SGD")
 # slide aggregation 输入: proba / labels
 AGG_INPUT="labels"
 
+# l2 / nol2
+L2_MODE="l2"
+
+# with2048 / tileonly
+COMBINE_MODE="with2048"
+
 start_time=$(date +%s)
 echo "Start time: $(date)"
-echo "Using PY=$PY ENV=$ENV_NAME CONFIG_DIR=$CONFIG_DIR AGG_INPUT=$AGG_INPUT"
+echo "Using PY=$PY ENV=$ENV_NAME CONFIG_DIR=$CONFIG_DIR AGG_INPUT=$AGG_INPUT L2_MODE=$L2_MODE COMBINE_MODE=$COMBINE_MODE"
 echo
 
 for model in "${MODELS[@]}"; do
@@ -34,6 +40,18 @@ for model in "${MODELS[@]}"; do
   # config-dir 只有你代码里真的用到才需要
   if [ -n "${CONFIG_DIR}" ]; then
     args+=(--config-dir "$CONFIG_DIR")
+  fi
+
+  if [ "$L2_MODE" = "l2" ]; then
+    args+=(--l2)
+  else
+    args+=(--no-l2)
+  fi
+
+  if [ "$COMBINE_MODE" = "with2048" ]; then
+    args+=(--combine-2048)
+  else
+    args+=(--no-combine-2048)
   fi
 
   echo "=== Running: python $PY ${args[*]} ==="
