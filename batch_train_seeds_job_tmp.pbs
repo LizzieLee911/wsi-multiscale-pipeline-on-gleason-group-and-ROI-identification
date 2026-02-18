@@ -1,0 +1,69 @@
+#!/bin/bash
+#PBS -N clau_batch_seeds
+#PBS -q normal
+#PBS -l select=1:ncpus=32:mem=128gb:ngpus=1
+#PBS -l walltime=12:00:00
+#PBS -j oe
+#PBS -P personal-lizh0106
+
+cd $PBS_O_WORKDIR
+
+module load miniforge3
+conda activate trident
+
+PY=/home/users/ntu/lizh0106/scratch/nscc_work/Baseline_models/scripts/batch_train_seeds.py
+
+ENV_NAME="nscc"
+CONFIG_DIR="config"   # 如果你是 config/paths.yaml 就用这个；不需要可删
+
+# 可选模型：LR_SGD / XGB / MLP
+MODELS=("LR_SGD")
+
+# slide aggregation 输入: proba / labels
+AGG_INPUT="labels"
+
+# l2 / nol2
+L2_MODE="l2"
+
+# with2048 / tileonly
+COMBINE_MODE="with2048"
+
+start_time=$(date +%s)
+echo "Start time: $(date)"
+echo "Using PY=$PY ENV=$ENV_NAME CONFIG_DIR=$CONFIG_DIR AGG_INPUT=$AGG_INPUT L2_MODE=$L2_MODE COMBINE_MODE=$COMBINE_MODE"
+echo
+
+for model in "${MODELS[@]}"; do
+
+  args=(--model "$model" --env "$ENV_NAME" --save --agg-input "$AGG_INPUT")
+
+  # config-dir 只有你代码里真的用到才需要
+  if [ -n "${CONFIG_DIR}" ]; then
+    args+=(--config-dir "$CONFIG_DIR")
+  fi
+
+  if [ "$L2_MODE" = "l2" ]; then
+    args+=(--l2)
+  else
+    args+=(--no-l2)
+  fi
+
+  if [ "$COMBINE_MODE" = "with2048" ]; then
+    args+=(--combine-2048)
+  else
+    args+=(--no-combine-2048)
+  fi
+
+  echo "=== Running: python $PY ${args[*]} ==="
+  date
+  python "$PY" "${args[@]}"
+  echo "=== Done ==="
+  date
+  echo
+
+done
+
+end_time=$(date +%s)
+runtime=$((end_time - start_time))
+echo "Finish time: $(date)"
+echo "Total runtime: ${runtime} seconds"
