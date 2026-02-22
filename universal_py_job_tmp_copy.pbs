@@ -1,0 +1,17 @@
+#!/bin/bash
+#PBS -N evaluate
+#PBS -q normal
+#PBS -l select=1:ncpus=8:mem=64gb
+#PBS -l walltime=3:00:00
+#PBS -j oe
+#PBS -P personal-lizh0106
+
+cd $PBS_O_WORKDIR
+
+module load miniforge3
+conda activate trident
+
+python /home/users/ntu/lizh0106/scratch/nscc_work/Baseline_models/scripts/collect_hard_labels_oof_metrics.py \
+  --results-dir /scratch/users/ntu/lizh0106/nscc_work/Baseline_models/results/hard_labels \
+  --tile-npz /scratch/users/ntu/lizh0106/nscc_work/Processed_Features/AGGC/20x_512/AGGC_tile_targets_masks_names.npz \
+  --output-csv /scratch/users/ntu/lizh0106/nscc_work/Baseline_models/results/hard_labels/aggc_in_domain_metrics.csv
