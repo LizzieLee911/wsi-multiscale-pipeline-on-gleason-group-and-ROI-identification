@@ -17,16 +17,16 @@ ENV_NAME="nscc"
 CONFIG_DIR="config"   # 如果你是 config/paths.yaml 就用这个；不需要可删
 
 # 可选模型：LR_SGD / XGB / MLP
-MODELS=("XGB")
+MODELS=("MLP")
 
 # slide aggregation 输入: proba / labels
 AGG_INPUT="labels"
 
 # l2 / nol2
-L2_MODE="no-l2"
+L2_MODE="l2"
 
 # with2048 / tileonly
-COMBINE_MODE="tileonly"
+COMBINE_MODE="with2048"
 
 start_time=$(date +%s)
 echo "Start time: $(date)"
